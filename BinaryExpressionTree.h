@@ -173,23 +173,11 @@ public:
 	//Used to delete all nodes of the tree
 	void clearTree(TreeNode* rootNode)
 	{
-		//While the current node exists
-		while (rootNode)
-		{
-			if (rootNode->leftNode == nullptr && rootNode->rightNode == nullptr) //If the current node is a leaf node
-			{
-				TreeNode* toDelete = rootNode; //Create a new pointer pointing to current node
-				rootNode = nullptr; //Set the current node pointer to nullptr
-				delete toDelete; //Delete the current node
-				return;
-			}
-			else
-			{
-				//Recursively calls the left and right child nodes to be deleted
-				clearTree(rootNode->leftNode);
-				clearTree(rootNode->rightNode);
-			}
-		}
+		if (!rootNode)
+			return;
+		clearTree(rootNode->leftNode);
+		clearTree(rootNode->rightNode);
+		delete rootNode;
 	}
 
 	//Returns root of binary tree, prints error if tree is empty
@@ -219,8 +207,6 @@ public:
 	//Destructor, calls clearTree function to delete all nodes
 	~BinaryExpressionTree()
 	{
-		if (!root)
-			return;
 		clearTree(root);
 	}
 };
