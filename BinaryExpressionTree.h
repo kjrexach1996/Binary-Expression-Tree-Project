@@ -30,7 +30,7 @@ public:
 	//Returns a binary tree representing the provided postfix expression
 	void buildFromPostfix(string expr)
 	{
-		postfix = expr; //Stores provided postfix expression
+		setPostfix(expr); //Stores provided postfix expression
 		stack<TreeNode*> st; //Stack of pointers to tree nodes
 		string token; //Represents operator or operand in postfix
 		istringstream ss(expr); //Tokenizes postfix
