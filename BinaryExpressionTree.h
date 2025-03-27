@@ -30,7 +30,7 @@ public:
 	//Returns a binary tree representing the provided postfix expression
 	void buildFromPostfix(string expr)
 	{
-		setPostfix(expr); //Stores provided postfix expression
+		postfix = expr; //Stores provided postfix expression
 		stack<TreeNode*> st; //Stack of pointers to tree nodes
 		string token; //Represents operator or operand in postfix
 		istringstream ss(expr); //Tokenizes postfix
@@ -49,28 +49,24 @@ public:
 			{
 				TreeNode* newNode = new TreeNode(token); //Create a new TreeNode holding the operator
 
-				//If the stack is not empty
-				if (!st.empty())
+				//If the stack is not empty and there are 2 operands to perform an operation
+				if (st.size() >= 2)
 				{
 					//Top node of the stack becomes right child node of new node
 					TreeNode* right = st.top(); 
 					st.pop();
 					newNode->rightNode = right;
 
-					//If the stack is not empty
-					if (!st.empty())
-					{
-						//Top node of the stack becomes left child node of new node
-						TreeNode* left = st.top();
-						st.pop();
-						newNode->leftNode = left;
-						st.push(newNode); //New node with child nodes is pushed to the stack
-					}
-					else
-						throw runtime_error("Stack is empty!"); //Stack is empty.
+					//Top node of the stack becomes left child node of new node
+					TreeNode* left = st.top();
+					st.pop();
+					newNode->leftNode = left;
+
+					//New node with child nodes is pushed to the stack
+					st.push(newNode); 
 				}
 				else
-					throw runtime_error("Stack is empty!"); //Stack is empty.
+					throw runtime_error("Not enough operands!"); //Stack is empty or missing operands
 			}
 			else
 				throw runtime_error("Invalid token found in expression!"); //Occurs when invalid token is found in postfix.
@@ -79,38 +75,37 @@ public:
 		if (!st.empty())
 		{
 			//Node on top of stack containing all other nodes becomes root node of binary tree
-			TreeNode* rootNode = st.top();
+			root = st.top();
 			st.pop();
-			root = rootNode;
 
 			//If the stack is not empty after tree is created
 			if (!st.empty())
 			{
-				root = nullptr; //Returns a reset, empty binary tree
-				throw runtime_error("Resetting root to null.");
+				root = nullptr; //Resets root to nullptr
+				throw runtime_error("Too many operands in expression! Resetting root to null.");
 			}
 		}
 	}
 
 	//Evaluates the postfix expression through the tree 
-	float evaluateTree(TreeNode* root)
+	float evaluateTree(TreeNode* rootNode)
 	{
-		if (root->leftNode == nullptr && root->rightNode == nullptr) //If the root node is a leaf node with no left or right nodes
-			return stod(root->data); //Convert the integer string and return
+		if (rootNode->leftNode == nullptr && rootNode->rightNode == nullptr) //If the root node is a leaf node with no left or right nodes
+			return stod(rootNode->data); //Convert the integer string and return
 		else
 		{
 			//Recursively call the function passing the left and right nodes
-			float leftOperand = evaluateTree(root->leftNode);
-			float rightOperand = evaluateTree(root->rightNode);
+			float leftOperand = evaluateTree(rootNode->leftNode);
+			float rightOperand = evaluateTree(rootNode->rightNode);
 
 			//Performs operation on the two operands from the leaf nodes depending on operator
-			if (root->data == "+")
+			if (rootNode->data == "+")
 				return leftOperand + rightOperand;
-			else if (root->data == "-")
+			else if (rootNode->data == "-")
 				return leftOperand - rightOperand;
-			else if (root->data == "*")
+			else if (rootNode->data == "*")
 				return leftOperand * rightOperand;
-			else if (root->data == "/")
+			else if (rootNode->data == "/")
 			{
 				if (rightOperand == 0)
 					throw runtime_error("Cannot divide by 0."); //Prints error statement when attempting division by 0
@@ -128,7 +123,7 @@ public:
 			return rootNode->data; //Return the data of the current node
 		else
 		{
-			if ((rootNode->data == "+" || rootNode->data == "-") && rootNode != root) //Adds parentheses to maintain rules of order of operations
+			if ((rootNode->data == "+" || rootNode->data == "-")) //Adds parentheses to maintain rules of order of operations
 			{
 				infix += "(";
 				infix += infixTraversal(rootNode->leftNode) + " "; //Visits left node first
@@ -184,14 +179,8 @@ public:
 	TreeNode* getRoot()
 	{
 		if (root == nullptr)
-			throw runtime_error("Tree is empty.");
+			throw runtime_error("Tree is empty!");
 		return root;
-	}
-
-	//Sets the postfix expression to a new expression
-	void setPostfix(string expr)
-	{
-		postfix = expr;
 	}
 
 	//Returns the current postfix expression
